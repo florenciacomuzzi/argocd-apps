@@ -106,3 +106,10 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=false  # Should already exist
+  ignoreDifferences:
+    # GKE Autopilot manages resources automatically
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/containers/0/resources/limits/ephemeral-storage
+        - /spec/template/spec/containers/0/resources/requests/ephemeral-storage
