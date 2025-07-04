@@ -15,8 +15,8 @@ metadata:
 spec:
   project: default  # Uses default project which can access any repository
   source:
-    repoURL: https://gitlab.com/obtain-blew/blueberry.git
-    path: argocd-bootstrap
+    repoURL: https://gitlab.com/obtain-blew/argocd-apps.git
+    path: bootstrap
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc

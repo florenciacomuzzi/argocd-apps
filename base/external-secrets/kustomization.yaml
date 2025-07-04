@@ -5,4 +5,6 @@ kind: Kustomization
 resources:
   - external-secrets.yml
   - gitlab-secrets-application.yml
+  - gitlab-token-secret_secretstore_gsm-store.yaml
+  - gitlab-token-secret_externalsecret_gitlab-token.yaml
   # Note: gitlab-token-secret.yml is excluded as it's handled by bootstrap

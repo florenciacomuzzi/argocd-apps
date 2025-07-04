@@ -57,17 +57,20 @@ jobs:
       - name: Install tools
         run: |
           # Install kustomize
-          curl -sLo /usr/local/bin/kustomize \
-            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64"
-          sudo chmod +x /usr/local/bin/kustomize
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- ${KUSTOMIZE_VERSION}
+          sudo mv kustomize /usr/local/bin/
+          kustomize version
 
           # Install kubeconform
-          curl -sLo /usr/local/bin/kubeconform \
-            "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64"
-          sudo chmod +x /usr/local/bin/kubeconform
+          wget -q https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz
+          tar xf kubeconform-linux-amd64.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -v
 
       - name: Build and validate dev overlay
-        run: kustomize build overlays/dev | kubeconform -strict -summary
+        run: |
+          SCHEMA_LOCATION='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+          kustomize build overlays/dev | kubeconform -strict -summary -schema-location "${SCHEMA_LOCATION}" -schema-location default
 
   kustomize-build-prod:
     name: Kustomize Build Prod
@@ -78,17 +81,20 @@ jobs:
       - name: Install tools
         run: |
           # Install kustomize
-          curl -sLo /usr/local/bin/kustomize \
-            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64"
-          sudo chmod +x /usr/local/bin/kustomize
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- ${KUSTOMIZE_VERSION}
+          sudo mv kustomize /usr/local/bin/
+          kustomize version
 
           # Install kubeconform
-          curl -sLo /usr/local/bin/kubeconform \
-            "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64"
-          sudo chmod +x /usr/local/bin/kubeconform
+          wget -q https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz
+          tar xf kubeconform-linux-amd64.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -v
 
       - name: Build and validate prod overlay
-        run: kustomize build overlays/prod | kubeconform -strict -summary
+        run: |
+          SCHEMA_LOCATION='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+          kustomize build overlays/prod | kubeconform -strict -summary -schema-location "${SCHEMA_LOCATION}" -schema-location default
 
   kube-score:
     name: Kube Score
@@ -99,14 +105,15 @@ jobs:
       - name: Install tools
         run: |
           # Install kustomize
-          curl -sLo /usr/local/bin/kustomize \
-            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64"
-          sudo chmod +x /usr/local/bin/kustomize
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- ${KUSTOMIZE_VERSION}
+          sudo mv kustomize /usr/local/bin/
+          kustomize version
 
           # Install kube-score
-          curl -sLo /usr/local/bin/kube-score \
-            "https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/kube-score_${KUBE_SCORE_VERSION}_linux_amd64"
-          sudo chmod +x /usr/local/bin/kube-score
+          wget -q https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/kube-score_${KUBE_SCORE_VERSION}_linux_amd64.tar.gz
+          tar xf kube-score_${KUBE_SCORE_VERSION}_linux_amd64.tar.gz
+          sudo mv kube-score /usr/local/bin/
+          kube-score version
 
       - name: Run kube-score
         run: |

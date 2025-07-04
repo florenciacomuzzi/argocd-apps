@@ -1,0 +1,95 @@
+name: Validate ArgoCD Manifests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup kustomize
+      uses: imranismail/setup-kustomize@v2
+      with:
+        kustomize-version: "5.1.1"
+
+    - name: Install kubeconform
+      run: |
+        wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+        tar xf kubeconform-linux-amd64.tar.gz
+        sudo mv kubeconform /usr/local/bin
+
+    - name: Install yamllint
+      run: |
+        pip install yamllint
+
+    - name: Validate YAML syntax
+      run: |
+        echo "📝 Validating YAML syntax..."
+        yamllint -c .yamllint .
+
+    - name: Build kustomize overlays
+      run: |
+        echo "🔧 Building kustomize overlays..."
+        echo "Building dev overlay..."
+        kustomize build overlays/dev > /tmp/dev.yaml
+        echo "Building prod overlay..."
+        kustomize build overlays/prod > /tmp/prod.yaml
+
+    - name: Validate with kubeconform
+      run: |
+        echo "🔍 Validating Kubernetes manifests..."
+        SCHEMA_LOCATION='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+        
+        echo "Validating dev overlay..."
+        kubeconform -strict -summary \
+          -schema-location "${SCHEMA_LOCATION}" \
+          -schema-location default \
+          /tmp/dev.yaml
+        
+        echo "Validating prod overlay..."
+        kubeconform -strict -summary \
+          -schema-location "${SCHEMA_LOCATION}" \
+          -schema-location default \
+          /tmp/prod.yaml
+
+    - name: Upload manifests as artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: rendered-manifests
+        path: |
+          /tmp/dev.yaml
+          /tmp/prod.yaml
+
+    - name: Check single document per file
+      run: |
+        echo "📄 Checking for multiple documents in single files..."
+        for file in $(find . -name "*.yaml" -o -name "*.yml" | grep -v ".git"); do
+          count=$(grep -c "^---" "$file" || true)
+          if [ "$count" -gt 1 ]; then
+            echo "❌ Error: $file contains multiple documents (found $count)"
+            exit 1
+          fi
+        done
+        echo "✅ All files contain single documents"
+
+    - name: Run kube-score
+      continue-on-error: true
+      run: |
+        echo "🏆 Running kube-score..."
+        wget https://github.com/zegl/kube-score/releases/latest/download/kube-score_linux_amd64.tar.gz
+        tar xf kube-score_linux_amd64.tar.gz
+        sudo mv kube-score /usr/local/bin
+        
+        echo "Scoring dev overlay..."
+        kube-score score /tmp/dev.yaml || true
+        
+        echo "Scoring prod overlay..."
+        kube-score score /tmp/prod.yaml || true

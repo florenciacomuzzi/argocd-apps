@@ -1,0 +1,4 @@
+# Kubeconform configuration for ArgoCD and External Secrets CRDs
+schema_locations:
+  - 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+  - 'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json'
