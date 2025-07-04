@@ -1,0 +1,103 @@
+# ArgoCD Image Updater
+# 
+# IMPORTANT: After deploying this application, you must run:
+#   ./scripts/setup-argocd-image-updater.sh
+# 
+# This will generate and configure the authentication token needed
+# for the Image Updater to connect to the ArgoCD API.
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-image-updater
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"  # Deploy after external-secrets but before apps
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argocd-image-updater
+    targetRevision: 0.11.0
+    helm:
+      values: |
+        serviceAccount:
+          create: true
+          annotations:
+            iam.gke.io/gcp-service-account: argocd-image-updater@development-454916.iam.gserviceaccount.com
+        # Add resource limits to reduce resource requirements
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+            ephemeral-storage: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+            ephemeral-storage: 512Mi
+        config:
+          registries:
+            - name: us-docker
+              prefix: us-docker.pkg.dev
+              api_url: https://us-docker.pkg.dev
+              credentials: ext:/scripts/gcr-login.sh
+              insecure: no
+          argocd:
+            grpcWeb: true
+            serverAddress: argocd-server.argocd
+            insecure: false
+            plaintext: true
+          git:
+            user: ArgoCD Image Updater
+            email: argocd-image-updater@blueberry.local
+        extraArgs:
+          - --argocd-grpc-web
+          - --argocd-server-addr=argocd-server.argocd
+        authScripts:
+          enabled: true
+          scripts:
+            gcr-login.sh: |
+              #!/bin/sh
+              # Get access token using metadata server (Workload Identity)
+              RESPONSE=$(wget -q -O - --header="Metadata-Flavor: Google" \
+                http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token)
+              
+              ACCESS_TOKEN=$(echo "$RESPONSE" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+              
+              if [ -z "$ACCESS_TOKEN" ]; then
+                echo "Error: Failed to get access token" >&2
+                echo "Response: $RESPONSE" >&2
+                exit 1
+              fi
+              
+              echo "oauth2accesstoken:${ACCESS_TOKEN}"
+        # Mount GitLab credentials from existing secret
+        extraEnv:
+          - name: ARGOCD_IMAGE_UPDATER_GITLAB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: gitlab-repo-creds
+                key: password
+        # Configure git credentials
+        sshConfig:
+          config: |
+            Host gitlab.com
+              HostName gitlab.com
+              User git
+              IdentityFile /app/ssh/identity
+              StrictHostKeyChecking no
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false  # Should already exist

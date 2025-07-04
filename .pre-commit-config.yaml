@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.32.0
+    hooks:
+      - id: yamllint
+        files: \.(yml|yaml)$
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - pyyaml 
+  - repo: local
+    hooks:
+      - id: compare-argocd
+        name: Compare against blueberry source-of-truth (non-blocking)
+        entry: python scripts/compare_dirs.py --warn-only "$SOURCE_OF_TRUTH" .
+        language: python
+        pass_filenames: false  # Run against entire repo, not staged files 

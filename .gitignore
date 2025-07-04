@@ -1,0 +1,42 @@
+# macOS files
+.DS_Store
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.code-workspace
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+ENV/
+venv/
+
+# Node modules (in case front-end utilities are added)
+node_modules/
+
+# Terraform / Pulumi state
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Helm / Kustomize build artifacts
+*.generated.yaml
+*.template.yaml
+chart/
+
+# Secrets (avoid committing sensitive data)
+*.secret
+
+# Logs
+*.log
+
+# Backup / swap files
+*~
+*.swp
+*.bak 
+
+.env
+

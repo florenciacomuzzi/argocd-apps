@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: blueberry
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/instance: blueberry
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"  # Deploy after secrets are available
+    argocd-image-updater.argoproj.io/image-list: manager=us-docker.pkg.dev/development-454916/blueberry/blueberry
+    argocd-image-updater.argoproj.io/manager.update-strategy: newest-build
+    argocd-image-updater.argoproj.io/manager.allow-tags: regexp:^[a-f0-9]{8}$
+    argocd-image-updater.argoproj.io/manager.ignore-tags: latest
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/git-credentials: secret:argocd/gitlab-repo-creds
+    argocd-image-updater.argoproj.io/manager.helm.image-name: image.repository
+    argocd-image-updater.argoproj.io/manager.helm.image-tag: image.tag
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: blueberry
+  source:
+    repoURL: https://gitlab.com/obtain-blew/blueberry.git
+    path: charts/blueberry
+    targetRevision: main
+    helm:
+      values: |
+        # Consider placing static values in the chart values.yaml file
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: blueberry
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+
+  ignoreDifferences:
+    # Ignore differences in StatefulSet fields that are immutable
+    # like in Redis StatefulSet
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/replicas
+        - /spec/updateStrategy
+        - /spec/podManagementPolicy
+        - /spec/revisionHistoryLimit
+        - /spec/selector
+        - /spec/serviceName
+        - /spec/template/metadata/annotations
+        - /spec/volumeClaimTemplates
