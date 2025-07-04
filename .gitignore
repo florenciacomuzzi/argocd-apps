@@ -40,3 +40,6 @@ chart/
 
 .env
 
+# AI
+CLAUDE.md
+# .cursorrules -- Cursor does not include any file in .gitignore within context
