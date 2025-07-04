@@ -4,6 +4,7 @@ kind: Kustomization
 
 resources:
   - ../../base/argocd-appproject/
+  - ../../base/argocd-repos/
   - ../../base/blueberry/
   - ../../base/external-secrets/
   - ../../base/argocd-image-updater/

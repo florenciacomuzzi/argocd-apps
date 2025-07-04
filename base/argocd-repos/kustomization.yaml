@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # If using External Secrets, use this:
+  - argocd-apps-repo-externalsecret.yml
+  # If manually managing the secret, use this instead:
+  # - argocd-apps-repo-secret.yml
