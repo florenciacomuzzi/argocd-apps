@@ -45,7 +45,7 @@ graph TD
 ## Step-by-Step Process
 
 ### 1. Terraform Apply
-- **Source**: `blueberry-terraform` repository
+- **Source**: `blueberry/blueberry-terraform`
 - **Creates**: 
   - GKE cluster infrastructure
   - Networking components

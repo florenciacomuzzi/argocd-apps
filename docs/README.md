@@ -57,6 +57,17 @@ Hooks configured:
 * **yamllint** – opinionated YAML linting
 * **flake8** – Python style & error checking (with `pyyaml` dependency)
 
+## Documentation
+
+### Architecture and Design
+- **[ArgoCD CRDs and Platform Integration](./argocd-crds-and-platform-integration.md)** - Comprehensive guide to ArgoCD Custom Resource Definitions and how they interact with platform components
+- **[GitOps Flow](./gitops-flow.md)** - Understanding the GitOps workflow and deployment process
+- **[Manifest Validation](./manifest-validation.md)** - Guide to validating Kubernetes manifests
+
+### Operational Guides
+- **Configuration Overrides** - How environment-specific configurations are applied
+- **Order of Operations** - Deployment sequence and dependencies
+
 ## Contribution Workflow
 
 1. Create a feature branch.

@@ -18,6 +18,8 @@ spec:
     repoURL: https://gitlab.com/obtain-blew/argocd-apps.git
     path: bootstrap
     targetRevision: main
+    # Use kustomize to apply all bootstrap resources
+    kustomize: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

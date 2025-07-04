@@ -1,0 +1,23 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-repos-bootstrap
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-50"  # After external-secrets but before main apps
+spec:
+  project: default
+  source:
+    repoURL: https://gitlab.com/obtain-blew/argocd-apps.git
+    path: base/argocd-repos
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
