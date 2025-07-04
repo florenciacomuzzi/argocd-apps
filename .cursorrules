@@ -13,7 +13,7 @@ You are working with an ArgoCD GitOps repository that manages Kubernetes deploym
 
 1. **GitOps First**: All changes must be committed to Git. Never suggest direct kubectl edits to the cluster.
 
-2. **Kustomize Pattern**: 
+2. **Kustomize Pattern**:
    - Base manifests contain common configurations
    - Overlays patch base manifests for each environment
    - Use strategic merge patches and JSON patches appropriately
