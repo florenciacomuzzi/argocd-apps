@@ -36,7 +36,7 @@ chart/
 # Backup / swap files
 *~
 *.swp
-*.bak 
+*.bak
 
 .env
 

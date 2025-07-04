@@ -2,7 +2,6 @@ stages:
   - lint
   - validate
   - policy
-  - compare
 
 image: alpine:3.19
 
@@ -59,9 +58,3 @@ kube-score:
   script:
     - kustomize build overlays/dev > /tmp/dev.yaml
     - kube-score score /tmp/dev.yaml --output-format ci
-
-compare-argocd:
-  stage: compare
-  script:
-    - python3 scripts/compare_dirs.py /Users/fcomuzzi/Documents/repos/blueberry/argocd/ .
-  allow_failure: true  # treat as warning for now 

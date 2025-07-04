@@ -64,4 +64,4 @@ Hooks configured:
 3. Open a merge request / pull request.
 4. CI will execute Kustomize build / lint checks.
 
-See the root `README.md` for more details about deploying via Argo CD. 
+See the root `README.md` for more details about deploying via Argo CD.

@@ -1,8 +1,8 @@
 # ArgoCD Image Updater
-# 
+#
 # IMPORTANT: After deploying this application, you must run:
 #   ./scripts/setup-argocd-image-updater.sh
-# 
+#
 # This will generate and configure the authentication token needed
 # for the Image Updater to connect to the ArgoCD API.
 #
@@ -63,15 +63,15 @@ spec:
               # Get access token using metadata server (Workload Identity)
               RESPONSE=$(wget -q -O - --header="Metadata-Flavor: Google" \
                 http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token)
-              
+
               ACCESS_TOKEN=$(echo "$RESPONSE" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
-              
+
               if [ -z "$ACCESS_TOKEN" ]; then
                 echo "Error: Failed to get access token" >&2
                 echo "Response: $RESPONSE" >&2
                 exit 1
               fi
-              
+
               echo "oauth2accesstoken:${ACCESS_TOKEN}"
         # Mount GitLab credentials from existing secret
         extraEnv:

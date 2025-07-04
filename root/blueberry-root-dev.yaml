@@ -20,3 +20,13 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+  ignoreDifferences:
+    # GKE Autopilot manages resources automatically
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/containers/*/resources
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/template/spec/containers/*/resources

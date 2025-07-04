@@ -16,11 +16,11 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies:
-          - pyyaml 
+          - pyyaml
   - repo: local
     hooks:
       - id: compare-argocd
         name: Compare against blueberry source-of-truth (non-blocking)
         entry: python scripts/compare_dirs.py --warn-only "$SOURCE_OF_TRUTH" .
         language: python
-        pass_filenames: false  # Run against entire repo, not staged files 
+        pass_filenames: false  # Run against entire repo, not staged files
