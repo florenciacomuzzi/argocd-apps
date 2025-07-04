@@ -68,7 +68,8 @@ spec:
               RESPONSE=$(wget -q -O - --header="Metadata-Flavor: Google" \
                 http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token)
 
-              ACCESS_TOKEN=$(echo "$RESPONSE" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+              ACCESS_TOKEN=$(echo "$RESPONSE" | \
+                grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
 
               if [ -z "$ACCESS_TOKEN" ]; then
                 echo "Error: Failed to get access token" >&2

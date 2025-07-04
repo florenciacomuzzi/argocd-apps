@@ -1,0 +1,20 @@
+---
+extends: default
+
+ignore: |
+  # Ignore git submodules
+  blueberry/
+
+  # Ignore other common directories
+  .git/
+  node_modules/
+  venv/
+  .venv/
+
+rules:
+  line-length:
+    max: 80
+    level: error
+  document-start:
+    present: true
+    level: warning

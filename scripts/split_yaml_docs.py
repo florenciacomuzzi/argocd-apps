@@ -21,8 +21,15 @@ def build_filename(base: str, idx: int, kind: str, name: str) -> str:
     return f"{stem}_{safe_kind}_{safe_name}.yaml"
 
 
-def split_file(path: str, delete_original: bool = False, dry_run: bool = False) -> List[str]:
-    """Split a YAML file into single-document files. Returns list of new files."""
+def split_file(
+    path: str,
+    delete_original: bool = False,
+    dry_run: bool = False
+) -> List[str]:
+    """Split a YAML file into single-document files.
+
+    Returns list of new files.
+    """
     new_files: List[str] = []
     with open(path, "r", encoding="utf-8") as fp:
         docs = list(yaml.safe_load_all(fp))
@@ -32,8 +39,14 @@ def split_file(path: str, delete_original: bool = False, dry_run: bool = False) 
 
     for idx, doc in enumerate(docs):
         kind = doc.get("kind") if isinstance(doc, dict) else "unk"
-        name = doc.get("metadata", {}).get("name") if isinstance(doc, dict) else "noname"
-        new_name = build_filename(os.path.basename(path), idx, kind or "unk", name or "noname")
+        name = (
+            doc.get("metadata", {}).get("name")
+            if isinstance(doc, dict)
+            else "noname"
+        )
+        new_name = build_filename(
+            os.path.basename(path), idx, kind or "unk", name or "noname"
+        )
         new_path = os.path.join(os.path.dirname(path), new_name)
         if dry_run:
             print("DRY-RUN: would create", new_path)
@@ -50,18 +63,37 @@ def split_file(path: str, delete_original: bool = False, dry_run: bool = False) 
     return new_files
 
 
-def walk_and_split(root: str, delete_original: bool = False, dry_run: bool = False) -> None:
+def walk_and_split(
+    root: str,
+    delete_original: bool = False,
+    dry_run: bool = False
+) -> None:
     for dirpath, _dirs, files in os.walk(root):
         for file in files:
             if file.endswith((".yml", ".yaml")):
-                split_file(os.path.join(dirpath, file), delete_original=delete_original, dry_run=dry_run)
+                split_file(
+                    os.path.join(dirpath, file),
+                    delete_original=delete_original,
+                    dry_run=dry_run
+                )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Split multi-document YAML files into single-document files.")
-    parser.add_argument("paths", nargs="+", help="File or directory paths to process")
-    parser.add_argument("--delete-original", "-d", action="store_true", help="Delete the original multi-doc file after splitting")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without writing files")
+    parser = argparse.ArgumentParser(
+        description="Split multi-document YAML files into "
+                    "single-document files."
+    )
+    parser.add_argument(
+        "paths", nargs="+", help="File or directory paths to process"
+    )
+    parser.add_argument(
+        "--delete-original", "-d", action="store_true",
+        help="Delete the original multi-doc file after splitting"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Show what would be done without writing files"
+    )
     args = parser.parse_args()
 
     for p in args.paths:
@@ -70,9 +102,17 @@ def main() -> None:
             print("Path not found:", abs_p, file=sys.stderr)
             continue
         if os.path.isdir(abs_p):
-            walk_and_split(abs_p, delete_original=args.delete_original, dry_run=args.dry_run)
+            walk_and_split(
+                abs_p,
+                delete_original=args.delete_original,
+                dry_run=args.dry_run
+            )
         else:
-            split_file(abs_p, delete_original=args.delete_original, dry_run=args.dry_run)
+            split_file(
+                abs_p,
+                delete_original=args.delete_original,
+                dry_run=args.dry_run
+            )
 
 
 if __name__ == "__main__":

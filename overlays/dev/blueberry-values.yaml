@@ -1,3 +1,4 @@
+---
 # Override values for blueberry application in dev environment
 # This file is updated by CI/CD pipeline
 image:

@@ -32,14 +32,24 @@ class Color:
 
 
 def load_gitignore(base_dir: str) -> "pathspec.PathSpec | None":
-    """Load .gitignore rules as a pathspec.PathSpec object or None if unavailable."""
+    """Load .gitignore rules as a pathspec.PathSpec object.
+
+    Returns None if unavailable.
+    """
     gitignore_path = os.path.join(base_dir, ".gitignore")
 
     if not os.path.isfile(gitignore_path):
         return None
 
     if pathspec is None:
-        print(Color.wrap("Warning: pathspec not installed – .gitignore patterns will be ignored", Color.YELLOW), file=sys.stderr)
+        print(
+            Color.wrap(
+                "Warning: pathspec not installed – "
+                ".gitignore patterns will be ignored",
+                Color.YELLOW
+            ),
+            file=sys.stderr
+        )
         return None
 
     with open(gitignore_path, "r", encoding="utf-8") as fp:
@@ -68,7 +78,10 @@ def is_yaml_file(path: str) -> bool:
 
 
 def diff_data(a, b, path: str = "") -> List[str]:
-    """Recursively diff two YAML-loaded python objects and return list of human-readable diffs."""
+    """Recursively diff two YAML-loaded python objects.
+
+    Returns list of human-readable diffs.
+    """
     diffs: List[str] = []
 
     # Helper to build child path
@@ -107,9 +120,13 @@ def diff_data(a, b, path: str = "") -> List[str]:
 
 
 def diff_yaml_files(path_a: str, path_b: str) -> List[str]:
-    """Return list of diff strings between two YAML files. Empty list means identical."""
+    """Return list of diff strings between two YAML files.
+
+    Empty list means identical.
+    """
     try:
-        with open(path_a, "r", encoding="utf-8") as fa, open(path_b, "r", encoding="utf-8") as fb:
+        with open(path_a, "r", encoding="utf-8") as fa, \
+             open(path_b, "r", encoding="utf-8") as fb:
             data_a = yaml.safe_load(fa) or {}
             data_b = yaml.safe_load(fb) or {}
     except Exception as exc:
@@ -118,18 +135,27 @@ def diff_yaml_files(path_a: str, path_b: str) -> List[str]:
     return diff_data(data_a, data_b)
 
 
-def list_files(base_dir: str, ignore_spec: "pathspec.PathSpec | None" = None) -> Set[str]:
-    """Recursively gather all file paths relative to base_dir, respecting .gitignore if provided."""
+def list_files(
+    base_dir: str,
+    ignore_spec: "pathspec.PathSpec | None" = None
+) -> Set[str]:
+    """Recursively gather all file paths relative to base_dir.
+
+    Respects .gitignore if provided.
+    """
     paths: Set[str] = set()
 
     for root, dirs, files in os.walk(base_dir):
-        # Modify dirs in-place to skip ignored directories early (.git always skipped)
+        # Modify dirs in-place to skip ignored directories early
+        # (.git always skipped)
         dirs[:] = [
             d
             for d in dirs
             if d != ".git" and (
                 ignore_spec is None
-                or not ignore_spec.match_file(os.path.relpath(os.path.join(root, d), base_dir))
+                or not ignore_spec.match_file(
+                    os.path.relpath(os.path.join(root, d), base_dir)
+                )
             )
         ]
 
@@ -142,14 +168,19 @@ def list_files(base_dir: str, ignore_spec: "pathspec.PathSpec | None" = None) ->
     return paths
 
 
-def compare_directories(dir_a: str, dir_b: str, ignore_spec: "pathspec.PathSpec | None" = None) -> Tuple[List[str], List[str], List[str], Dict[str, List[str]]]:
+def compare_directories(
+    dir_a: str,
+    dir_b: str,
+    ignore_spec: "pathspec.PathSpec | None" = None
+) -> Tuple[List[str], List[str], List[str], Dict[str, List[str]]]:
     """Compare two directories.
 
     Returns four collections:
     - only_in_a: files present only in dir_a
     - only_in_b: files present only in dir_b
     - different: files present in both but with different contents
-    - yaml_diffs: mapping from rel_path -> list of key-level diffs (only for YAML files)
+    - yaml_diffs: mapping from rel_path -> list of key-level diffs
+      (only for YAML files)
     """
     files_a = list_files(dir_a, ignore_spec)
     files_b = list_files(dir_b, ignore_spec)
@@ -179,10 +210,16 @@ def compare_directories(dir_a: str, dir_b: str, ignore_spec: "pathspec.PathSpec 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Compare two directories recursively, reporting extra files and differing file contents.")
+        description="Compare two directories recursively, "
+                    "reporting extra files and differing file contents."
+    )
     parser.add_argument("dir_a", help="First directory to compare")
     parser.add_argument("dir_b", help="Second directory to compare")
-    parser.add_argument("--warn-only", "-w", action="store_true", help="Do not fail (exit 0) when differences are found; just output warnings")
+    parser.add_argument(
+        "--warn-only", "-w", action="store_true",
+        help="Do not fail (exit 0) when differences are found; "
+             "just output warnings"
+    )
     args = parser.parse_args()
 
     dir_a = os.path.abspath(args.dir_a)
@@ -198,10 +235,11 @@ def main() -> None:
     # Load .gitignore once (assume script run from repo root or pass cwd)
     ignore_spec = load_gitignore(os.getcwd())
 
-    only_in_a, only_in_b, different, yaml_diffs = compare_directories(dir_a, dir_b, ignore_spec)
+    only_in_a, only_in_b, different, yaml_diffs = compare_directories(
+        dir_a, dir_b, ignore_spec
+    )
 
-    # Collect warnings (non-blocking issues)
-    warnings: List[str] = []
+    # Note: warnings collection removed as unused
 
     if not (only_in_a or only_in_b or different):
         print(Color.wrap("Directories are identical ✨", Color.GREEN))
@@ -220,7 +258,11 @@ def main() -> None:
         print()
 
     if different:
-        header = "Files with differing contents:" if not args.warn_only else "Files with differing contents (warning):"
+        header = (
+            "Files with differing contents:"
+            if not args.warn_only
+            else "Files with differing contents (warning):"
+        )
         colour = Color.RED if not args.warn_only else Color.YELLOW
         print(Color.wrap(header, Color.CYAN))
         for path in different:
