@@ -21,9 +21,10 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  ignoreDifferences: # applies to ALL child applications it manages
+  ignoreDifferences:  # applies to ALL child applications it manages
     # The ignoreDifferences in the root app only applies to resources directly
-    # managed by the root app, NOT to resources managed by child Applications e.g., image-updater
+    # managed by the root app, NOT to resources managed by child
+    # Applications e.g., image-updater
     # GKE Autopilot manages resources automatically
     - group: apps
       kind: Deployment
