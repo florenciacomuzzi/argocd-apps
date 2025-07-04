@@ -1,0 +1,29 @@
+---
+# Bootstrap Application
+# This app runs in the default project and creates the necessary resources
+# for the main blueberry-root-dev application to function
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-bootstrap
+  namespace: argocd
+  annotations:
+    # Deploy before everything else
+    argocd.argoproj.io/sync-wave: "-100"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default  # Uses default project which can access any repository
+  source:
+    repoURL: https://gitlab.com/obtain-blew/blueberry.git
+    path: argocd-bootstrap
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false  # argocd namespace should already exist
