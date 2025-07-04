@@ -1,3 +1,4 @@
+---
 # ArgoCD Image Updater
 #
 # IMPORTANT: After deploying this application, you must run:
@@ -12,7 +13,8 @@ metadata:
   name: argocd-image-updater
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-5"  # Deploy after external-secrets but before apps
+    # Deploy after external-secrets but before apps
+    argocd.argoproj.io/sync-wave: "-5"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -26,7 +28,8 @@ spec:
         serviceAccount:
           create: true
           annotations:
-            iam.gke.io/gcp-service-account: argocd-image-updater@development-454916.iam.gserviceaccount.com
+            iam.gke.io/gcp-service-account: |
+              argocd-image-updater@development-454916.iam.gserviceaccount.com
         # Add resource limits to reduce resource requirements
         resources:
           limits:
@@ -60,7 +63,8 @@ spec:
           scripts:
             gcr-login.sh: |
               #!/bin/sh
-              # Get access token using metadata server (Workload Identity)
+              # Get access token using metadata server
+              # (Workload Identity)
               RESPONSE=$(wget -q -O - --header="Metadata-Flavor: Google" \
                 http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token)
 

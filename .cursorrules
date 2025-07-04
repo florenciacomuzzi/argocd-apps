@@ -1,0 +1,82 @@
+# ArgoCD GitOps Repository Rules
+
+You are working with an ArgoCD GitOps repository that manages Kubernetes deployments using Kustomize.
+
+## Repository Structure
+- `base/`: Core Kubernetes manifests with placeholder values
+- `overlays/`: Environment-specific configurations (dev, prod, staging)
+- `root/`: ArgoCD Application resources pointing to overlays
+- `bootstrap/`: Initial setup and bootstrap configurations
+- `scripts/`: Utility scripts for maintenance
+
+## Key Principles
+
+1. **GitOps First**: All changes must be committed to Git. Never suggest direct kubectl edits to the cluster.
+
+2. **Kustomize Pattern**: 
+   - Base manifests contain common configurations
+   - Overlays patch base manifests for each environment
+   - Use strategic merge patches and JSON patches appropriately
+
+3. **ArgoCD Integration**:
+   - Root applications define what ArgoCD should deploy
+   - Changes trigger automatic synchronization
+   - Respect ArgoCD annotations and labels
+
+## When Working with This Repository
+
+### DO:
+- Maintain the base/overlay structure
+- Use Kustomize's built-in features (patches, configMapGenerator, etc.)
+- Keep environment-specific values in overlays only
+- Validate YAML syntax before committing
+- Test Kustomize builds locally: `kustomize build overlays/dev/`
+- Follow existing naming conventions
+- Keep manifests DRY by using Kustomize features
+
+### DON'T:
+- Put environment-specific values in base manifests
+- Commit secrets directly (use External Secrets)
+- Create resources outside the established structure
+- Bypass GitOps by applying changes directly to the cluster
+- Mix concerns between different applications
+
+## Common Patterns
+
+### Adding Environment Variables
+1. Define placeholder in base manifest
+2. Create patch in overlay
+3. Reference patch in overlay's kustomization.yaml
+
+### Creating New Environments
+1. Create new overlay directory
+2. Copy and modify existing kustomization.yaml
+3. Create root application pointing to new overlay
+
+### Image Updates
+- Prefer ArgoCD Image Updater for automated updates
+- Manual updates go in base or overlay depending on requirements
+
+## File Naming Conventions
+- Base manifests: `<resource-name>.yml`
+- Patches: `<resource-name>-patch.yaml`
+- Values files: `<app-name>-values.yaml`
+- Root apps: `<app-name>-root-<env>.yaml`
+
+## Validation Commands
+```bash
+# Validate Kustomize build
+kustomize build overlays/dev/
+
+# Dry-run with kubectl
+kustomize build overlays/dev/ | kubectl apply --dry-run=client -f -
+
+# Check YAML syntax
+yamllint base/
+```
+
+## Security Considerations
+- Never commit secrets, use External Secrets Operator
+- Use RBAC appropriately in manifests
+- Follow least privilege principle
+- Validate image sources and tags
