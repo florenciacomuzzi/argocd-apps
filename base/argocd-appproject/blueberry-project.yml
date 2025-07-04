@@ -1,0 +1,29 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: blueberry
+  namespace: argocd
+spec:
+  description: Blueberry application project
+  sourceRepos:
+    - https://gitlab.com/obtain-blew/blueberry.git
+    - https://gitlab.com/obtain-blew/argocd-apps.git
+    - https://charts.external-secrets.io
+    - https://argoproj.github.io/argo-helm
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  roles:
+    - name: admin
+      policies:
+        - p, proj:blueberry:admin, applications, *, blueberry/*, allow
+        - p, proj:blueberry:admin, repositories, *, *, allow
+      groups:
+        - blueberry-admins
