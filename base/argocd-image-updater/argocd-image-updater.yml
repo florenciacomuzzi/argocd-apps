@@ -51,7 +51,7 @@ spec:
             grpcWeb: true
             serverAddress: argocd-server.argocd
             insecure: false
-            plaintext: true
+            plaintext: false
           git:
             user: ArgoCD Image Updater
             email: argocd-image-updater@blueberry.local
